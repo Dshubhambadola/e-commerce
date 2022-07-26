@@ -1,14 +1,15 @@
-const express = require("express");
-const http = require("http");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const session = require("express-session");
+import express from "express";
+import { createServer } from "http";
+import { urlencoded, json } from "body-parser";
+import cors from "cors";
+import { connect, connection } from "mongoose";
+import session from "express-session";
+
+require("dotenv").config();
 
 const app = express();
-const server = http.createServer(app);
+const server = createServer(app);
 const logger = require("pino")();
-require("dotenv").config();
 
 const {
     MONGODB_URI, PORT, SESSION_SECRET,
@@ -26,30 +27,29 @@ app.use((req, res, next) => {
 });
 // NOTE: * will allow all origins which is not what we want in production
 app.options("*", cors());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(urlencoded({ extended: false }));
+app.use(json());
 app.use(session({
     secret: SESSION_SECRET, cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false,
 }));
 // Configure mongoose
 
-mongoose.connect(
+connect(
     MONGODB_URI,
     {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
+        autoIndex: true,
     },
 );
-const db = mongoose.connection;
+const db = connection;
 db.on("error", (error) => {
     logger.error("Mongoose error", error);
 });
 db.once("open", async () => {
     logger.info("Connected to mongoose");
 });
-app.use(require("./routes"));
+app.use(require("./routes").default);
 
 // PORT to be taken from .env
 server.listen(PORT, () => logger.info(`Server running on port ${PORT}`));

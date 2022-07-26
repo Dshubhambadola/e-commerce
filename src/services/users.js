@@ -1,19 +1,20 @@
 /* eslint-disable class-methods-use-this */
-const logger = require("pino")();
+import Users from "../models/users";
 
-const Users = require("../models/users");
+const logger = require("pino")();
 
 class UserServices {
     async createUser(usersData) {
         try {
             const {
-                name, email, mobileNo, registrationId,
+                name, email, mobileNo, registrationId, userType,
             } = usersData;
             const newUser = new Users({
                 name,
                 email,
                 mobileNo,
                 registrationId,
+                userType,
             });
             await newUser.save();
             return {
@@ -26,4 +27,4 @@ class UserServices {
     }
 }
 
-module.exports = UserServices;
+export default UserServices;
