@@ -1,24 +1,22 @@
 /* eslint-disable class-methods-use-this */
-const logger = require("pino")();
 const crypto = require("crypto");
 const { get } = require("lodash");
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
 
-const LoginRegistration = require("../models/loginRegistration").default;
-const UserService = require("./users").default;
+const LoginRegistration = require("../models/loginRegistration");
+const UsersService = require("./users");
 
-const allUsersServices = new UserService();
+const allUsersServices = new UsersService();
 
 const {
-    JWT_SECRET, CRYPTO_SECRET, JWT_ALGORITHM, CRYPTO_ALGORITHM,
+    JWT_SECRET, CRYPTO_SECRET, CRYPTO_ALGORITHM,
 } = process.env;
 
 const jwtSecretKey = JWT_SECRET;
 const jwtExpirySeconds = 60 * 60 * 24 * 2;
 
-class LoginRegistrationServices {
-    async registration(registrationData) {
+class AuthService {
+    async register(registrationData) {
         try {
             const {
                 name, mobileNo, email, password, userType,
@@ -29,7 +27,7 @@ class LoginRegistrationServices {
             const userDetails = await LoginRegistration.findOne({ email });
             const userExists = get(userDetails, "email", false);
             if (userExists) {
-                return "Email already exists! Please Login.";
+                throw new Error("Email already exists! Please Login.");
             }
 
             const createRegistration = new LoginRegistration({
@@ -45,10 +43,10 @@ class LoginRegistrationServices {
                 userType,
             };
             await allUsersServices.createUser(userData);
-            logger.info("Registrations");
-            return userRegistration;
+            const token = this.createJwt(email);
+            return { status: 201, message: { token } };
         } catch (err) {
-            throw logger.error(err);
+            throw new Error(err || "error in creating user");
         }
     }
 
@@ -60,17 +58,21 @@ class LoginRegistrationServices {
                 .toString("hex");
             const dbHashedPassword = get(userDetails, "password");
             if (dbHashedPassword === hashedPassword) {
-                const userToken = jwt.sign({ email }, jwtSecretKey, {
-                    algorithm: JWT_ALGORITHM,
-                    expiresIn: jwtExpirySeconds,
-                });
-                return { status: 201, message: userToken };
+                const token = this.createJwt(email);
+                return { status: 201, message: { token } };
             }
-            return { status: 401, message: "Username or Password incorrect. Please check!" };
+            return { status: 401, message: "Invalid login credentials. Please check!" };
         } catch (err) {
-            throw new Error(err || "error in creating user");
+            throw new Error(err || "login error");
         }
+    }
+
+    createJwt(email) {
+        return jwt.sign({ email }, jwtSecretKey, {
+            // Note: using default HMAC SHA 256 algorithm to sign
+            expiresIn: jwtExpirySeconds,
+        });
     }
 }
 
-module.exports = LoginRegistrationServices;
+module.exports = AuthService;

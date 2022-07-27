@@ -1,7 +1,7 @@
-import mongoose, { model } from "mongoose";
-import USER_TYPES from "../constants/index";
+const mongoose = require("mongoose");
+const constants = require("../constants/index");
 
-const allowedUserTypes = Object.keys(USER_TYPES);
+const allowedUserTypes = Object.keys(constants.USER_TYPES);
 
 const { Schema } = mongoose;
 const { ObjectId } = mongoose;
@@ -35,5 +35,5 @@ const schema = new Schema({
     timestamps: true,
 });
 
-const User = model("User", schema);
-export default User;
+const User = mongoose.model("User", schema);
+module.exports = User;

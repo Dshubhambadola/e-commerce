@@ -1,30 +1,29 @@
-import { object, string } from "joi";
-import constants from "../../constants/index";
-
-const { USER_TYPES } = constants;
+const Joi = require("joi");
+const { USER_TYPES } = require("../../constants/index");
+const { validator } = require("../../utils/index");
 
 const allowedUserTypes = Object.keys(USER_TYPES);
 
-const validator = (schema) => async (payload) => {
-    try {
-        return schema.validateAsync(payload, { abortEarly: false });
-    } catch (error) {
-        const formattedMessage = error.details.map((err) => err.message);
-        throw new Error(formattedMessage);
-    }
-};
-
 const register = (payload) => {
-    const schema = object({
-        name: string().required(),
-        mobileNo: string().length(10).pattern(/^[0-9]+$/).required(),
-        email: string().email({ tlds: { allow: false } }).required(),
-        password: string().min(3).max(15).required(),
-        userType: string().required().valid(...allowedUserTypes),
+    const schema = Joi.object({
+        name: Joi.string().required(),
+        mobileNo: Joi.string().length(10).pattern(/^[0-9]+$/).required(),
+        email: Joi.string().email({ tlds: { allow: false } }).required(),
+        password: Joi.string().min(3).max(15).required(),
+        userType: Joi.string().required().valid(...allowedUserTypes),
     });
     return validator(schema)(payload);
 };
 
-export default {
+const login = (payload) => {
+    const schema = Joi.object({
+        email: Joi.string().email({ tlds: { allow: false } }).required(),
+        password: Joi.string().required(),
+    });
+    return validator(schema)(payload);
+};
+
+module.exports = {
     register,
+    login,
 };

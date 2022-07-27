@@ -1,8 +1,8 @@
 const USER_TYPES = {
-    BUYERS: "BUYERS",
-    SELLERS: "SELLERS",
+    BUYER: "BUYER",
+    SELLER: "SELLER",
 };
 
-export default {
+module.exports = {
     USER_TYPES,
 };
