@@ -1,0 +1,69 @@
+{
+    "extends": "airbnb-base",
+    "rules": {
+        "quotes": [
+            "error",
+            "double",
+            {
+                "allowTemplateLiterals": true
+            }
+        ],
+        "indent": [
+            "error",
+            4
+        ],
+        "max-len": [
+            "error",
+            {
+                "code": 120,
+                "ignoreTemplateLiterals": true,
+                "tabWidth": 4
+            }
+        ],
+        "no-unused-vars": "warn",
+        "radix": [
+            "error",
+            "as-needed"
+        ],
+        "no-shadow": [
+            "error",
+            {
+                "allow": [
+                    "resolve",
+                    "reject",
+                    "done",
+                    "cb",
+                    "err"
+                ]
+            }
+        ],
+        "no-underscore-dangle": [
+            "error",
+            {
+                "allow": [
+                    "_id",
+                    "__leadoBaseDir",
+                    "__v"
+                ]
+            }
+        ],
+        "operator-linebreak": [
+            1,
+            "after",
+            {
+                "overrides": {
+                    "=": "after"
+                }
+            }
+        ],
+        "no-plusplus": [
+            "error",
+            {
+                "allowForLoopAfterthoughts": true
+            }
+        ]
+    },
+    "globals": {
+        "Log": false
+    }
+}
